@@ -1,0 +1,26 @@
+cd '/mnt/c/Users/wojkamin/Desktop/New folder/upskillPySpark/wsl_jupyter_workidr/spark-warehouse'
+
+
+
+cd '/mnt/c/Users/wojkamin/Desktop/New folder/upskillPySpark'
+
+
+cd '/mnt/c/Users/wojkamin/Desktop/New folder/upskillPySpark/wsl_jupyter_workidr/spark-warehouse'
+
+
+
+cd '/mnt/c/Users/wojkamin/Desktop/New folder/upskillPySpark'
+spark-submit --master <master-url> my_spark_app.py
+
+/////////////////
+spark-submit --master 'local' playground.py
+
+////////////////////////
+
+
+/mnt/c/Users/wojkamin/Desktop/New folder/upskillPySpark/wsl_jupyter_workidr
+
+spark-submit --master 'local' \
+'/mnt/c/Users/wojkamin/Desktop/New folder/upskillPySpark/\
+wsl_jupyter_workidr/playground.py'
+
