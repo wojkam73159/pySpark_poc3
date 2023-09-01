@@ -1,6 +1,7 @@
 playground.py
 
 warehouse/
+.vscode/
 metastore_db/
 poc3_dataset/
 scripts.txt
