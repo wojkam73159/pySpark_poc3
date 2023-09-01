@@ -1,14 +1,15 @@
 playground.py
 
-
+warehouse/
 metastore_db/
 poc3_dataset/
-
+scripts.txt
 
 *.dat
 derby.log
 poc3.md
 *.md
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
