@@ -1,20 +1,28 @@
 import unittest
 
-from chispa.column_comparer import assert_column_equality, assert_df_equality
-import pyspark.sql.functions as F
+from chispa import assert_column_equality, assert_df_equality
+
 from pyspark.sql import SparkSession
 from poc3 import rename_columns,filter_countries
 
-spark = (SparkSession.builder
-  .master("local")
-  .appName("chispa")
-  .getOrCreate())
+
 
 
 
 class MyTestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.spark = (SparkSession.builder
+                        .master("local")
+                        .appName("chispa")
+                        .getOrCreate())()
 
-    def test_rename_columns_correct_names():
+    @classmethod
+    def tearDownClass(self):
+        self.spark.stop()
+
+
+    def test_rename_columns_correct_names(self):
         old_names=["cc_t","cc_n","cc_mc","a","ac_t"]
         new_names=["id","credit_card_type","credit_card_number","credit_card_currency","active","account_type"]
         data = [
@@ -23,10 +31,10 @@ class MyTestCase(unittest.TestCase):
             (3,"jcb",3543626440463933,"IDR",True,"3XL"),
             (4,"mastercard",5002359260942096,"PEN",False,"L")
         ]
-        df_tested = spark.createDataFrame(data, old_names)
+        df_tested = self.spark.createDataFrame(data, old_names)
         df_tested = rename_columns(data,new_names)
 
-        df_expected = spark.createDataFrame(data, new_names)
+        df_expected = self.spark.createDataFrame(data, new_names)
         
         assert_df_equality(df_tested, df_expected)
 

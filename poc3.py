@@ -68,7 +68,6 @@ if __name__ == "__main__":
     spark = (
         SparkSession.builder.appName("PySpark_poc_w_Hive")
         .config(conf=spark_conf)
-        .enableHiveSupport()
         .getOrCreate())
  
     logger = spark._jvm.org.apache.log4j.Logger.getLogger("PySpark_poc_w_Hive")
@@ -89,39 +88,39 @@ if __name__ == "__main__":
         ]
     )
 
-clientsDF = (
-    spark.read.option("sep", ",")
-    .option("header", True)
-    .schema(clients_schema)
-    .csv(clients_csv_path)
-    .select("id", "email", "country")#remove PII
-)
-
-clientsDF = filter_countries(clientsDF, countries, "country")
-
-finance_schema = StructType(
-    [
-        StructField("id", IntegerType(), True),
-        StructField("cc_t", StringType(), True),
-        StructField("cc_n", LongType(), True),
-        StructField("cc_mc", StringType(), True),
-        StructField("a", BooleanType(), True),
-        StructField("ac_t", StringType(), True),
-    ]
-)
-
-financeDF = (
-    spark.read.option("sep", ",")
-    .option("header", True)
-    .schema(finance_schema)
-    .csv(financial_csv_path)
+    clientsDF = (
+        spark.read.option("sep", ",")
+        .option("header", True)
+        .schema(clients_schema)
+        .csv(clients_csv_path)
+        .select("id", "email", "country")#remove PII
     )
 
-new_names=["id","credit_card_type","credit_card_number","credit_card_currency","active","account_type"]
-financeDF=rename_columns(financeDF,new_names)
-joinedDF = clientsDF.join(financeDF, ["id"])
-joinedDF.show()
+    clientsDF = filter_countries(clientsDF, countries, "country")
 
-joinedDF.write.mode("overwrite").csv("client_data/")
+    finance_schema = StructType(
+        [
+            StructField("id", IntegerType(), True),
+            StructField("cc_t", StringType(), True),
+            StructField("cc_n", LongType(), True),
+            StructField("cc_mc", StringType(), True),
+            StructField("a", BooleanType(), True),
+            StructField("ac_t", StringType(), True),
+        ]
+    )
 
-# joinedDF.write.format("csv")
+    financeDF = (
+        spark.read.option("sep", ",")
+        .option("header", True)
+        .schema(finance_schema)
+        .csv(financial_csv_path)
+        )
+
+    new_names=["id","credit_card_type","credit_card_number","credit_card_currency","active","account_type"]
+    financeDF=rename_columns(financeDF,new_names)
+    joinedDF = clientsDF.join(financeDF, ["id"])
+    joinedDF.show()
+
+    joinedDF.write.mode("overwrite").csv("client_data/")
+
+    # joinedDF.write.format("csv")
