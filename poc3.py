@@ -9,7 +9,7 @@ from pyspark.sql.types import (
     StructField,
     TimestampType,
     BooleanType,
-    FloatType
+    FloatType,
 )
 from pyspark.sql.functions import col, upper
 from typing import List
@@ -27,18 +27,23 @@ def filter_countries(to_filterDF: DataFrame, countries_list: list[str], df_col_n
     countries_regex = "|".join(countries_list)
     return to_filterDF.filter(upper(to_filterDF[df_col_name]).rlike(countries_regex))
 
-def rename_columns(DF_to_rename:DataFrame, new_names:list[str]):
-    old_names=DF_to_rename.schema.names
-    if len(old_names)!= len(new_names):
+
+def rename_columns(DF_to_rename: DataFrame, new_names: list[str]):
+    old_names = DF_to_rename.schema.names
+    if len(old_names) != len(new_names):
         raise Exception("names list different len than datafram columns")
 
-    resDF=reduce(lambda DF, idx : DF.withColumnRenamed(old_names[idx], new_names[idx]),range(len(old_names)),DF_to_rename)
+    resDF = reduce(
+        lambda DF, idx: DF.withColumnRenamed(old_names[idx], new_names[idx]),
+        range(len(old_names)),
+        DF_to_rename,
+    )
     return resDF
 
 
-def get_logger(self, spark: SparkSession, my_logger_name:str = ""):
-    log4j_logger = spark._jvm.org.apache.log4j  
-    return log4j_logger.LogManager.getLogger(my_logger_name )
+def get_logger(self, spark: SparkSession, my_logger_name: str = ""):
+    log4j_logger = spark._jvm.org.apache.log4j
+    return log4j_logger.LogManager.getLogger(my_logger_name)
 
 
 if __name__ == "__main__":
@@ -54,22 +59,27 @@ if __name__ == "__main__":
     financial_csv_path = args.dataset2
     countries = args.list_countries
 
-    log_file_path="/home/wojkamin/my_folder/poc3_folder/logs/out.log"
-    spark_conf = SparkConf()\
-        .set("Dlog4j.rootCategory", "INFO,FILE")\
-        .set("spark.log4j.appender.FILE", "org.apache.log4j.FileAppender") \
-        .set("spark.log4j.appender.FILE.File", log_file_path) \
-        .set("spark.log4j.appender.FILE.layout", "org.apache.log4j.PatternLayout") \
-        .set("spark.log4j.appender.FILE.layout.ConversionPattern", "%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n") \
+    log_file_path = "/home/wojkamin/my_folder/poc3_folder/logs/out.log"
+    spark_conf = (
+        SparkConf()
+        .set("Dlog4j.rootCategory", "INFO,FILE")
+        .set("spark.log4j.appender.FILE", "org.apache.log4j.FileAppender")
+        .set("spark.log4j.appender.FILE.File", log_file_path)
+        .set("spark.log4j.appender.FILE.layout", "org.apache.log4j.PatternLayout")
+        .set(
+            "spark.log4j.appender.FILE.layout.ConversionPattern",
+            "%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n",
+        )
         .set("spark.log4j.logger.FILE", "INFO, FILE")
-#.set("spark.driver.extraJavaOptions", "-Dlog4j.rootCategory=INFO,FILE")\
-    
+    )
+    # .set("spark.driver.extraJavaOptions", "-Dlog4j.rootCategory=INFO,FILE")\
 
     spark = (
         SparkSession.builder.appName("PySpark_poc_w_Hive")
         .config(conf=spark_conf)
-        .getOrCreate())
- 
+        .getOrCreate()
+    )
+
     logger = spark._jvm.org.apache.log4j.Logger.getLogger("PySpark_poc_w_Hive")
     logger.info("This is an informational message.")
     logger.warn("This is a warning message.")
@@ -93,7 +103,7 @@ if __name__ == "__main__":
         .option("header", True)
         .schema(clients_schema)
         .csv(clients_csv_path)
-        .select("id", "email", "country")#remove PII
+        .select("id", "email", "country")  # remove PII
     )
 
     clientsDF = filter_countries(clientsDF, countries, "country")
@@ -114,10 +124,17 @@ if __name__ == "__main__":
         .option("header", True)
         .schema(finance_schema)
         .csv(financial_csv_path)
-        )
+    )
 
-    new_names=["id","credit_card_type","credit_card_number","credit_card_currency","active","account_type"]
-    financeDF=rename_columns(financeDF,new_names)
+    new_names = [
+        "id",
+        "credit_card_type",
+        "credit_card_number",
+        "credit_card_currency",
+        "active",
+        "account_type",
+    ]
+    financeDF = rename_columns(financeDF, new_names)
     joinedDF = clientsDF.join(financeDF, ["id"])
     joinedDF.show()
 
