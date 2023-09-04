@@ -14,21 +14,24 @@ from pyspark.sql.types import (
 from pyspark.sql.functions import col, upper
 from typing import List
 import argparse
+from functools import reduce
 
-#countries_list=["Poland","France"]
-#.*POLAND.*|.*FRANCE.*
-#df_col_name="country"
-def filter_countries(to_filterDF:DataFrame, countries_list:list[str],df_col_name):
-    countries_list=map(lambda x : ".*"+x.upper()+".*",countries_list)
-    countries_regex="|".join(countries_list)
+
+# countries_list=["Poland","France"]
+# .*POLAND.*|.*FRANCE.*
+# df_col_name="country"
+def filter_countries(to_filterDF: DataFrame, countries_list: list[str], df_col_name):
+    countries_list = map(lambda x: ".*" + x.upper() + ".*", countries_list)
+    countries_regex = "|".join(countries_list)
     return to_filterDF.filter(upper(to_filterDF[df_col_name]).rlike(countries_regex))
 
+def rename_columns(DF_to_rename:DataFrame, new_names:list[str]):
+    old_names=financeDF.schema.names
+    if len(old_names)!= len(new_names):
+        raise Exception("names list different len than datafram columns")
 
-
-# Create a Spark session
-
-#database_path = spark.conf.get("spark.sql.warehouse.dir")
-#print("Current database path:", database_path)
+    resDF=reduce(lambda DF, idx : DF.withColumnRenamed(old_names[idx], new_names[idx]),range(len(old_names)),DF_to_rename)
+    return resDF
 
 ##
 # id,first_name,last_name,email,gender,country,phone,birthdate
@@ -45,46 +48,41 @@ def filter_countries(to_filterDF:DataFrame, countries_list:list[str],df_col_name
 # account type
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PySpark Application with Arguments")
 
-    # Add the command-line arguments
     parser.add_argument("--dataset1", type=str, help="First argument")
     parser.add_argument("--dataset2", type=str, help="Second argument")
-    parser.add_argument("--list_arg", nargs="+", type=str, help="List of strings")
+    parser.add_argument("--list_countries", nargs="+", type=str, help="List of strings")
 
-    # Parse the command-line arguments
     args = parser.parse_args()
-        
     warehouse_location = r"warehouse/"
     clients_csv_path = args.dataset1
-    #r"poc3_dataset/clients.csv"
     financial_csv_path = args.dataset2
-    #r"poc3_dataset/clients.csv"
-    countries=args.list_arg
+    countries = args.list_countries
 
     spark = (
-    SparkSession.builder.appName("PySpark_SQL_w_Hive")
-    .config("spark.sql.warehouse.dir", warehouse_location)
-    .config(
-        "javax.jdo.option.ConnectionURL",
-        f"jdbc:derby:{warehouse_location}/metastore_db;create=true",
+        SparkSession.builder.appName("PySpark_poc_w_Hive")
+        .config("spark.sql.warehouse.dir", warehouse_location)
+        .config(
+            "javax.jdo.option.ConnectionURL",
+            f"jdbc:derby:{warehouse_location}/metastore_db;create=true",
+        )
+        .enableHiveSupport()
+        .getOrCreate()
     )
-    .enableHiveSupport()
-    .getOrCreate()
-    )
-    
+
     clients_schema = StructType(
-    [
-        StructField("id", IntegerType(), True),
-        StructField("first_name", StringType(), True),
-        StructField("last_name", StringType(), True),
-        StructField("email", StringType(), True),
-        StructField("gender", StringType(), True),
-        StructField("country", StringType(), True),
-        StructField("phone", StringType(), True),
-        StructField("birthdate", TimestampType(), True),
-    ]
+        [
+            StructField("id", IntegerType(), True),
+            StructField("first_name", StringType(), True),
+            StructField("last_name", StringType(), True),
+            StructField("email", StringType(), True),
+            StructField("gender", StringType(), True),
+            StructField("country", StringType(), True),
+            StructField("phone", StringType(), True),
+            StructField("birthdate", TimestampType(), True),
+        ]
     )
 
 clientsDF = (
@@ -93,19 +91,15 @@ clientsDF = (
     .schema(clients_schema)
     .csv(clients_csv_path)
     .select("id", "email", "country")
-    #.filter(
-    #    like(upper(col("country")), "%POLAND%")
-    #    or like(upper(col("country")), "%FRANCE%")
-    #)
-    )
+)
 
-clientsDF=filter_countries(clientsDF,countries,"country")
+clientsDF = filter_countries(clientsDF, countries, "country")
 
 finance_schema = StructType(
     [
         StructField("id", IntegerType(), True),
         StructField("cc_t", StringType(), True),
-        StructField("cc_n", IntegerType(), True),
+        StructField("cc_n", LongType(), True),
         StructField("cc_mc", StringType(), True),
         StructField("a", BooleanType(), True),
         StructField("ac_t", StringType(), True),
@@ -116,20 +110,21 @@ financeDF = (
     spark.read.option("sep", ",")
     .option("header", True)
     .schema(finance_schema)
-    .csv(financial_csv_path)
-    .selectExpr(
-        "id as id",
-        "cc_t as credit_card_type",
-        "cc_n as credit_card_number",
-        "cc_mc as credit_card_currency",
-        "a as active",
-        "ac_t as account type",
-    )
-)
-
-joinedDF = clientsDF.join(financeDF, clientsDF.id == financeDF.id)
+    .csv(financial_csv_path))
+#    '''.selectExpr(
+#        "id as id",
+#        "cc_t as credit_card_type",
+#        "cc_n as credit_card_number",
+#        "cc_mc as credit_card_currency",
+#        "a as active",
+#        "ac_t as account_type",
+#    )'''
+#)
+new_names=["id","credit_card_type","credit_card_number","credit_card_currency","active","account_type"]
+financeDF=rename_columns(financeDF,new_names)
+joinedDF = clientsDF.join(financeDF, ["id"])
 joinedDF.show()
 
-#joinedDF.write.format("csv")
+joinedDF.write.mode("overwrite").csv("client_data/")
 
-
+# joinedDF.write.format("csv")

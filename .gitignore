@@ -11,6 +11,7 @@ derby.log
 poc3.md
 *.md
 .vscode/
+clients_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
