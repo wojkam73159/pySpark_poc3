@@ -28,7 +28,7 @@ def filter_countries(to_filterDF: DataFrame, countries_list: list[str], df_col_n
     return to_filterDF.filter(upper(to_filterDF[df_col_name]).rlike(countries_regex))
 
 def rename_columns(DF_to_rename:DataFrame, new_names:list[str]):
-    old_names=financeDF.schema.names
+    old_names=DF_to_rename.schema.names
     if len(old_names)!= len(new_names):
         raise Exception("names list different len than datafram columns")
 

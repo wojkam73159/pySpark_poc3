@@ -13,9 +13,10 @@ class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.spark = (SparkSession.builder
-                        .master("local")
+                        
                         .appName("chispa")
-                        .getOrCreate())()
+                        .getOrCreate())
+        #.master("local")
 
     @classmethod
     def tearDownClass(self):
@@ -32,11 +33,18 @@ class MyTestCase(unittest.TestCase):
             (4,"mastercard",5002359260942096,"PEN",False,"L")
         ]
         df_tested = self.spark.createDataFrame(data, old_names)
-        df_tested = rename_columns(data,new_names)
+        df_tested = rename_columns(df_tested,new_names)
 
+        columns_list=df_tested.schema
+        print(columns_list)
+
+        new_names=["id","credit_card_type","credit_card_number","credit_card_currency","active","account_type"]
         df_expected = self.spark.createDataFrame(data, new_names)
         
         assert_df_equality(df_tested, df_expected)
 
 
         ###############################
+
+if __name__=="__main__":
+    unittest.main()
