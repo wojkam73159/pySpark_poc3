@@ -9,7 +9,6 @@ scripts.txt
 *.dat
 derby.log
 poc3.md
-*.md
 .vscode/
 client_data/
 logs/
