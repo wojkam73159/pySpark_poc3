@@ -22,7 +22,6 @@ from pyspark.conf import SparkConf
 # countries_list=["Poland","France"]
 # .*POLAND.*|.*FRANCE.*
 # df_col_name="country"
-##############################################
 def filter_countries(to_filterDF: DataFrame, countries_list: list[str], df_col_name):
     countries_list = map(lambda x: ".*" + x.upper() + ".*", countries_list)
     countries_regex = "|".join(countries_list)
