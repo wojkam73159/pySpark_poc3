@@ -31,6 +31,7 @@ def filter_countries(to_filterDF: DataFrame, countries_list: list[str], df_col_n
 def rename_columns(DF_to_rename: DataFrame, new_names: list[str]):
     old_names = DF_to_rename.schema.names
     if len(old_names) != len(new_names):
+        logger.error("rename columns:names list different len than datafram columns ")
         raise Exception("names list different len than datafram columns")
 
     resDF = reduce(
@@ -62,17 +63,15 @@ if __name__ == "__main__":
     log_file_path = "/home/wojkamin/my_folder/poc3_folder/logs/out.log"
     spark_conf = (
         SparkConf()
-        .set("Dlog4j.rootCategory", "INFO,FILE")
-        .set("spark.log4j.appender.FILE", "org.apache.log4j.FileAppender")
-        .set("spark.log4j.appender.FILE.File", log_file_path)
-        .set("spark.log4j.appender.FILE.layout", "org.apache.log4j.PatternLayout")
         .set(
-            "spark.log4j.appender.FILE.layout.ConversionPattern",
-            "%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n",
+            "spark.driver.extraJavaOptions",
+            "-Dlog4j.configuration=file:/home/wojkamin/my_folder/poc3_folder/log4j.properties",
         )
-        .set("spark.log4j.logger.FILE", "INFO, FILE")
+        .set(
+            "spark.executor.extraJavaOptions",
+            "-Dlog4j.configuration=file:/home/wojkamin/my_folder/poc3_folder/log4j.properties",
+        )
     )
-    # .set("spark.driver.extraJavaOptions", "-Dlog4j.rootCategory=INFO,FILE")\
 
     spark = (
         SparkSession.builder.appName("PySpark_poc_w_Hive")
