@@ -22,9 +22,9 @@ from pyspark.conf import SparkConf
 # countries_list=["Poland","France"]
 # .*POLAND.*|.*FRANCE.*
 # df_col_name="country"
-def filter_countries(to_filterDF: DataFrame, countries_list: list[str], df_col_name):
-    countries_list = map(lambda x: ".*" + x.upper() + ".*", countries_list)
-    countries_regex = "|".join(countries_list)
+def filter_col_for_strings(to_filterDF: DataFrame, strs_to_check: list[str], df_col_name):
+    strs_to_check = map(lambda x: ".*" + x.upper() + ".*", strs_to_check)
+    countries_regex = "|".join(strs_to_check)
     return to_filterDF.filter(upper(to_filterDF[df_col_name]).rlike(countries_regex))
 
 
@@ -50,14 +50,14 @@ def get_logger(self, spark: SparkSession, my_logger_name: str = ""):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PySpark Application with Arguments")
 
-    parser.add_argument("--dataset1", type=str, help="dataset1")
-    parser.add_argument("--dataset2", type=str, help="dataset2")
-    parser.add_argument("--list_countries", nargs="+", type=str, help="List of strings")
+    parser.add_argument("--clients_csv", type=str, help="path to dataset with clients csv")
+    parser.add_argument("--financial_csv", type=str, help="path to dataset with financial csv")
+    parser.add_argument("--list_countries", nargs="+", type=str, help="List of countries to filter")
 
     args = parser.parse_args()
-    warehouse_location = r"warehouse/"
-    clients_csv_path = args.dataset1
-    financial_csv_path = args.dataset2
+
+    clients_csv_path = args.clients_csv
+    financial_csv_path = args.financial_csv
     countries = args.list_countries
 
     log_file_path = "/home/wojkamin/my_folder/poc3_folder/logs/out.log"
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         .select("id", "email", "country")  # remove PII
     )
 
-    clientsDF = filter_countries(clientsDF, countries, "country")
+    clientsDF = filter_col_for_strings(clientsDF, countries, "country")
 
     finance_schema = StructType(
         [
