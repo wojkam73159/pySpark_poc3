@@ -1,6 +1,6 @@
 import unittest
 
-from chispa import assert_column_equality, assert_df_equality
+from chispa import  assert_df_equality
 
 from pyspark.sql import SparkSession
 from poc3 import rename_columns, filter_col_for_strings
@@ -90,7 +90,7 @@ class MyTestCase(unittest.TestCase):
 
         df_tested = filter_col_for_strings(df_tested, str_to_filter_for, "country")
         assert_df_equality(df_tested, df_expected)
-    
+
     def test_filter_col_for_strings_matches_multiple_elements(self):
         columns = ["id", "country"]
         data = [
@@ -100,9 +100,9 @@ class MyTestCase(unittest.TestCase):
             (4, "poland,france,germany"),
             (5, "germany france"),
             (6, "POLINESIA,FRANKONIA"),
-            (7,"america")
+            (7, "america"),
         ]
-        str_to_filter_for = ["pol", "fra","ger"]
+        str_to_filter_for = ["pol", "fra", "ger"]
         df_tested = self.spark.createDataFrame(data, columns)
         data_expected = [
             (1, "pol"),
@@ -110,7 +110,7 @@ class MyTestCase(unittest.TestCase):
             (3, "ger"),
             (4, "poland,france,germany"),
             (5, "germany france"),
-            (6, "POLINESIA,FRANKONIA")
+            (6, "POLINESIA,FRANKONIA"),
         ]
         df_expected = self.spark.createDataFrame(data_expected, columns)
 
