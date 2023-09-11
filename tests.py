@@ -50,7 +50,72 @@ class MyTestCase(unittest.TestCase):
 
         assert_df_equality(df_tested, df_expected)
 
-        ###############################
+    def test_filter_col_for_strings_catches_longer_names(self):
+        columns = ["id", "country"]
+        data = [
+            (1, "pol"),
+            (2, "POL"),
+            (3, "pOl"),
+            (4, "poland"),
+            (5, "polonie"),
+            (6, "polska"),
+            (7, "Polska"),
+            (8, "POLINEZJA!!!"),
+        ]
+        df_tested = self.spark.createDataFrame(data, columns)
+        df_expected = df_tested.select(columns)
+        str_to_filter_for = ["pol"]
+        df_tested = filter_col_for_strings(df_tested, str_to_filter_for, "country")
+        assert_df_equality(df_tested, df_expected)
+
+    def test_filter_col_for_strings_omits_names_too_short(self):
+        columns = ["id", "country"]
+        data = [
+            (1, "pol"),
+            (2, "POL"),
+            (3, "pOl"),
+            (4, "poland"),
+            (5, "polonie"),
+            (6, "polska"),
+            (7, "Polska"),
+            (8, "POLINEZJA!!!"),
+        ]
+        str_to_filter_for = ["pols"]
+        df_tested = self.spark.createDataFrame(data, columns)
+        data_expected = [
+            (6, "polska"),
+            (7, "Polska"),
+        ]
+        df_expected = self.spark.createDataFrame(data_expected, columns)
+
+        df_tested = filter_col_for_strings(df_tested, str_to_filter_for, "country")
+        assert_df_equality(df_tested, df_expected)
+    
+    def test_filter_col_for_strings_matches_multiple_elements(self):
+        columns = ["id", "country"]
+        data = [
+            (1, "pol"),
+            (2, "fra"),
+            (3, "ger"),
+            (4, "poland,france,germany"),
+            (5, "germany france"),
+            (6, "POLINESIA,FRANKONIA"),
+            (7,"america")
+        ]
+        str_to_filter_for = ["pol", "fra","ger"]
+        df_tested = self.spark.createDataFrame(data, columns)
+        data_expected = [
+            (1, "pol"),
+            (2, "fra"),
+            (3, "ger"),
+            (4, "poland,france,germany"),
+            (5, "germany france"),
+            (6, "POLINESIA,FRANKONIA")
+        ]
+        df_expected = self.spark.createDataFrame(data_expected, columns)
+
+        df_tested = filter_col_for_strings(df_tested, str_to_filter_for, "country")
+        assert_df_equality(df_tested, df_expected)
 
 
 if __name__ == "__main__":
