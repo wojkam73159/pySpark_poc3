@@ -1,10 +1,9 @@
 playground.py
-temp/
 
 warehouse/
 .vscode/
 metastore_db/
-#poc3_dataset/
+poc3_dataset/
 scripts.txt
 
 *.dat

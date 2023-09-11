@@ -3,7 +3,7 @@ import unittest
 from chispa import assert_column_equality, assert_df_equality
 
 from pyspark.sql import SparkSession
-import  poc3_package as poc3#import rename_columns, filter_col_for_strings
+from poc3 import rename_columns, filter_countries
 
 
 class MyTestCase(unittest.TestCase):
@@ -33,7 +33,6 @@ class MyTestCase(unittest.TestCase):
             (4, "mastercard", 5002359260942096, "PEN", False, "L"),
         ]
         df_tested = self.spark.createDataFrame(data, old_names)
-        
         df_tested = rename_columns(df_tested, new_names)
 
         columns_list = df_tested.schema
