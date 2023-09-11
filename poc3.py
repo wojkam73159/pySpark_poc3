@@ -1,5 +1,4 @@
 from pyspark.sql import SparkSession
-from pyspark import SparkContext
 from pyspark.sql import DataFrame
 from pyspark.sql.types import (
     LongType,
@@ -9,20 +8,19 @@ from pyspark.sql.types import (
     StructField,
     TimestampType,
     BooleanType,
-    FloatType,
 )
-from pyspark.sql.functions import col, upper
-from typing import List
+from pyspark.sql.functions import upper
 import argparse
 from functools import reduce
-import logging
 from pyspark.conf import SparkConf
 
 
-# countries_list=["Poland","France"]
-# .*POLAND.*|.*FRANCE.*
-# df_col_name="country"
-def filter_col_for_strings(to_filterDF: DataFrame, strs_to_check: list[str], df_col_name):
+# countries_list = ["Poland","France"]
+# regex = .*POLAND.*|.*FRANCE.*
+# df_col_name = "country"
+def filter_col_for_strings(
+    to_filterDF: DataFrame, strs_to_check: list[str], df_col_name
+):
     strs_to_check = map(lambda x: ".*" + x.upper() + ".*", strs_to_check)
     countries_regex = "|".join(strs_to_check)
     return to_filterDF.filter(upper(to_filterDF[df_col_name]).rlike(countries_regex))
@@ -50,9 +48,15 @@ def get_logger(self, spark: SparkSession, my_logger_name: str = ""):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PySpark Application with Arguments")
 
-    parser.add_argument("--clients_csv", type=str, help="path to dataset with clients csv")
-    parser.add_argument("--financial_csv", type=str, help="path to dataset with financial csv")
-    parser.add_argument("--list_countries", nargs="+", type=str, help="List of countries to filter")
+    parser.add_argument(
+        "--clients_csv", type=str, help="path to dataset with clients csv"
+    )
+    parser.add_argument(
+        "--financial_csv", type=str, help="path to dataset with financial csv"
+    )
+    parser.add_argument(
+        "--list_countries", nargs="+", type=str, help="List of countries to filter"
+    )
 
     args = parser.parse_args()
 
