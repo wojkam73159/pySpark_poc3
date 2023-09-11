@@ -3,7 +3,7 @@ import unittest
 from chispa import assert_column_equality, assert_df_equality
 
 from pyspark.sql import SparkSession
-from poc3 import rename_columns, filter_countries
+from poc3 import rename_columns, filter_col_for_strings
 
 
 class MyTestCase(unittest.TestCase):
