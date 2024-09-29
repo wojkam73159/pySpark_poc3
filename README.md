@@ -17,17 +17,17 @@ The data processing pipeline is managed using command-line arguments for flexibi
 
  
 ## Running the Application Locally
-spark-submit --master  spark://XXXXXXXX \
-/home/wojkamin/my_folder/poc3_folder/poc3.py \
---clients_csv poc3_dataset/clients.csv \
---financial_csv "poc3_dataset/financial.csv" \
---list_countries "Poland" "France"
+    spark-submit --master  spark://XXXXXXXX \
+    /home/wojkamin/my_folder/poc3_folder/poc3.py \
+    --clients_csv poc3_dataset/clients.csv \
+    --financial_csv "poc3_dataset/financial.csv" \
+    --list_countries "Poland" "France"
 
 or
 
-python poc3.py \
---clients_csv poc3_dataset/clients.csv \
---financial_csv "poc3_dataset/financial.csv" \
---list_countries "Poland" "France"
+    python poc3.py \
+    --clients_csv poc3_dataset/clients.csv \
+    --financial_csv "poc3_dataset/financial.csv" \
+    --list_countries "Poland" "France"
 
 results are stored in folder client_data
